@@ -3,9 +3,9 @@ import math
 import numpy
 import time
 import os
+import datetime
 
-
-filepath = input("Enter Filepath: ")
+# filepath = input("Enter Filepath: ")
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -16,7 +16,7 @@ try:
 except:
     pass
 
-# filepath = r"input\\TMC Fresh 236K 02242022.csv"
+filepath = r"input\\TMC Fresh 236K 02242022.csv"
 filename = filepath.split(r"\\")[-1].split(".")[-2]
 print(filename)
 try:
@@ -92,61 +92,7 @@ def values_for_reshape_sorted(array):
     return row, col
 
 
-def array_to_csv(np_array, header=False, index=None):
 
-    # out = numpy.full((values_for_reshape_sorted(np_array)), numpy.nan, dtype=object)
-
-    row, col = values_for_reshape_unsorted(np_array)
-
-    total_length = row * col
-
-    current_length = len(np_array)
-
-    length_of_nan = total_length-current_length
-
-    final_1d_array = numpy.array_split(np_array, col)
-
-    # print(total_length, current_length, length_of_nan)
-    # print(numpy.array(final_1d_array,dtype=object))
-    out_array = numpy.array(final_1d_array, dtype=object)
-    # print(len(final_1d_array))
-
-    df = pd.DataFrame(out_array)
-
-    print(df)
-
-    # i = 1
-    # for array in final_1d_array:
-
-    #     array.to_csv(f"file_{i}.csv")
-    #     i = i + 1
-
-    #     print(len(array))
-
-    # print(np_array.reshape(values_for_reshape_sorted(np_array)))
-
-    # print(out)
-
-    # np_array.ravel().reshape(values_for_reshape_sorted(np_array))
-
-    # print(out.ravel())
-
-    # try:
-    #     dataframe = pd.DataFrame(out)
-
-    #     if header:
-    #         header = ['phone_no' for i in range(dataframe.shape[1])]
-    #     else:
-    #         header = None
-
-    #     dataframe.dropna(inplace = True)
-    #     dataframe.to_csv(f"{filename}",header=header, index=index)
-
-    #     return "File Saved!"
-
-    # except Exception as e:
-    #     return str(e)
-# array_to_csv(output_array)
 np_array = result.to_numpy().flatten()
 #-------checks to implement on np_array--
 
@@ -176,7 +122,9 @@ i = 1
 for array in final_1d_array:
 
     df = pd.DataFrame(array)
-    df.set_axis(["Phone"],axis=1,inplace=True)
+    df['Date'] = datetime.date.today()
+    df.set_axis(["Phone","Date"],axis=1,inplace=True)
+
 
     df.to_csv(f"output/{filename}/file_{i}.csv", index=False)
 
