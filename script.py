@@ -4,21 +4,24 @@ import numpy
 import time
 import os
 import datetime
-
+from pymysql import connect
+import pandas.io.sql as sql
 # filepath = input("Enter Filepath: ")
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-print(ROOT_DIR)
+# print(ROOT_DIR)
 timestr = time.strftime("%Y%m%d-%H%M%S")
 try:
     os.mkdir(os.path.join(ROOT_DIR, "output"))
 except:
     pass
 
-filepath = r"input\\TMC Fresh 236K 02242022.csv"
+filepath = r"input\\P1 Lead Backup Data FIle -Sep 2021 copy.csv"
 filename = filepath.split(r"\\")[-1].split(".")[-2]
 print(filename)
+
+
 try:
     os.mkdir(os.path.join(ROOT_DIR, "output", filename))
 except:
@@ -26,6 +29,15 @@ except:
 data = pd.read_csv(filepath, dtype=object, low_memory=False)
 # print(data)
 
+
+def read_database_for_duplicates():
+    con=connect(user="cron",password="MTdkOTJhOGEw",host="136.243.37.207",database="asterisk")
+    df_tra_dnc=sql.read_sql("""SELECT phone_number as Phone FROM vicidial_list WHERE `status`='TRA' OR `status` = 'DNC';""",con)
+    
+    numpy_array = df_tra_dnc.to_numpy().flatten()
+    return numpy_array
+
+numpy_array_from_database = read_database_for_duplicates()
 
 flatten_data = data.to_numpy().flatten()
 print("Here", flatten_data)
@@ -46,6 +58,7 @@ result = flatten_dataframe[~(flatten_dataframe['phone_number'].astype(str).str[:
 # output_array = result.to_numpy().flatten()
 
 # print("Output Array is:", output_array)
+
 
 
 def values_for_reshape_unsorted(array):
@@ -98,6 +111,9 @@ np_array = result.to_numpy().flatten()
 
 np_array = numpy.array([str(el)[-10:] for el in np_array.astype(object) if len(str(el)) >= 10])
 
+
+np_array = numpy.setdiff1d(np_array, numpy_array_from_database).reshape(-1)
+
 if len(np_array) > 1000000:
     row, col = values_for_reshape_sorted(np_array)
 else:
@@ -113,9 +129,10 @@ length_of_nan = total_length-current_length
 
 final_1d_array = numpy.array_split(np_array, col)
 
+
 # print(total_length, current_length, length_of_nan)
 # print(numpy.array(final_1d_array,dtype=object))
-out_array = numpy.array(final_1d_array, dtype=object)
+# out_array = numpy.array(final_1d_array, dtype=object)
 # print(len(final_1d_array))
 
 i = 1
